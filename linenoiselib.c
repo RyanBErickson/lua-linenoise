@@ -1,5 +1,7 @@
-/* linenoise.c -- guerrilla line editing library against the idea that a
- * line editing lib needs to be 20,000 lines of C code.
+/* linenoise.c -- VERSION 1.0
+ *
+ * Guerrilla line editing library against the idea that a line editing lib
+ * needs to be 20,000 lines of C code.
  *
  * You can find the latest source code at:
  *
@@ -649,6 +651,22 @@ void linenoiseEditMoveEnd(struct linenoiseState *l) {
     }
 }
 
+/* Move cursor to the next word. */
+void linenoiseEditMoveNextWord(struct linenoiseState *l) {
+    linenoiseEditMoveRight(l);
+    while ((l->pos < l->len) && (l->buf[l->pos - 1] != ' ')) {
+        linenoiseEditMoveRight(l);
+    }
+}
+
+/* Move cursor to the previous word. */
+void linenoiseEditMovePrevWord(struct linenoiseState *l) {
+    linenoiseEditMoveLeft(l);
+    while ((l->pos > 0) && (l->buf[l->pos - 1] != ' ')) {
+        linenoiseEditMoveLeft(l);
+    }
+}
+
 /* Substitute the currently edited line with the next or previous history
  * entry as specified by 'dir'. */
 #define LINENOISE_HISTORY_NEXT 0
@@ -751,7 +769,7 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
     while(1) {
         char c;
         int nread;
-        char seq[3];
+        char seq[5];
 
         nread = read(l.ifd,&c,1);
         if (nread <= 0) return l.len;
@@ -825,9 +843,29 @@ static int linenoiseEdit(int stdin_fd, int stdout_fd, char *buf, size_t buflen, 
                     if (read(l.ifd,seq+2,1) == -1) break;
                     if (seq[2] == '~') {
                         switch(seq[1]) {
+                        case '1': /* Home key in screen/byobu. */
+                            linenoiseEditMoveHome(&l);
+                            break;
+                        case '4': /* End key in screen/byobu. */
+                            linenoiseEditMoveEnd(&l);
+                            break;
                         case '3': /* Delete key. */
                             linenoiseEditDelete(&l);
                             break;
+                        }
+                    }
+                    if (seq[2] == ';') {
+                        /* Further Extended escape, read additional byte. */
+                        if (read(l.ifd,seq+3,1) == -1) break;
+                        if (seq[3] == '5') {
+                            /* Further Extended escape, read additional byte. */
+                            if (read(l.ifd,seq+4,1) == -1) break;
+                            if (seq[4] == 'D') {  /* Ctrl-Left key  */
+                                linenoiseEditMovePrevWord(&l);
+                            }
+                            if (seq[4] == 'C') {  /* Ctrl-Right key  */
+                                linenoiseEditMoveNextWord(&l);
+                            }
                         }
                     }
                 } else {
