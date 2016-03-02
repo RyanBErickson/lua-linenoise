@@ -1,5 +1,5 @@
 package = 'linenoise'
-version = '0.8-1'
+version = '0.9-1'
 source = {
   url = 'https://github.com/RyanBErickson/lua-linenoise/archive/0.9.tar.gz',
   dir = 'lua-linenoise-0.9',
