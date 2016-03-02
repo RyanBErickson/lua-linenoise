@@ -1,8 +1,8 @@
 package = 'linenoise'
 version = '0.8-1'
 source = {
-  url = 'https://github.com/RyanBErickson/lua-linenoise/archive/master.zip',
-  dir = 'lua-linenoise-0.8',
+  url = 'https://github.com/RyanBErickson/lua-linenoise/archive/0.9.tar.gz',
+  dir = 'lua-linenoise-0.9',
 }
 description = {
   summary  = 'A binding for the linenoise command line library',
